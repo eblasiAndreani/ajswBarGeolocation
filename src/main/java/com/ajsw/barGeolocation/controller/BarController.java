@@ -1,7 +1,6 @@
 package com.ajsw.barGeolocation.controller;
 
-import com.ajsw.barGeolocation.domain.dto.RequestBarPostDto;
-import com.ajsw.barGeolocation.domain.dto.RequestBarPutDto;
+import com.ajsw.barGeolocation.domain.dto.*;
 import com.ajsw.barGeolocation.domain.entity.BarEntity;
 import com.ajsw.barGeolocation.service.IBarService;
 import org.slf4j.Logger;
@@ -11,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -21,70 +21,104 @@ public class BarController {
     private static final Logger LOGGER = LoggerFactory.getLogger(BarController.class);
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<BarEntity>> getAllPayment(){
+    public ResponseEntity<ResponseBaresDto> getAllPayment(){
+        ResponseBaresDto BaresDto = new ResponseBaresDto();
         try{
-            List<BarEntity> a = _barService.getAll();
-            return ResponseEntity.ok(a);
+
+            List<Bar> bars = _barService.getAll();
+
+            BaresDto.setBody(bars);
+
+            return ResponseEntity.ok(BaresDto);
+
         }catch (Exception ex) {
-            return null;
+            LOGGER.error(ex.getMessage());
+            BaresDto.setErrors(new Errors(500, ex.getMessage(), Arrays.toString(ex.getStackTrace())));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(BaresDto);
         }
     }
 
-    @GetMapping("/getById")
-    public ResponseEntity<BarEntity> getById(@RequestParam Integer id){
+    @GetMapping("/getById/{id}")
+    public ResponseEntity<ResponseBarDto> getById(@PathVariable Integer id){
+        ResponseBarDto barDto = new ResponseBarDto();
         try{
-            BarEntity bar = _barService.getById(id);
+            Bar bar = _barService.getById(id);
+
             if (bar != null){
-                return ResponseEntity.ok(bar);
+                barDto.setBody(bar);
+                return ResponseEntity.ok(barDto);
             }else{
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+                barDto.setErrors(new Errors(204, "No se encontró Bar",null));
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(barDto);
             }
 
         }catch (Exception ex) {
             LOGGER.error(ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            barDto.setErrors(new Errors(500, ex.getMessage(), Arrays.toString(ex.getStackTrace())));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(barDto);
         }
     }
-    @GetMapping("getByLocation")
-    public  ResponseEntity<List<BarEntity>> getByLocation(double latitude, double longitude, double distance){
 
+    @GetMapping("getByLocation")
+    public  ResponseEntity<ResponseBaresDto> getByLocation(double latitude, double longitude, double distance){
+
+        ResponseBaresDto baresDto = new ResponseBaresDto();
         try {
-            List<BarEntity> barList = _barService.GetByLocation(latitude, longitude, distance);
+            List<Bar> barList = _barService.GetByLocation(latitude, longitude, distance);
+
             if (barList.isEmpty()){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+                baresDto.setErrors(new Errors(204, "No se encuentran bares cerca",null));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(baresDto);
             }
-            return  ResponseEntity.status(HttpStatus.OK).body(barList);
+
+            baresDto.setBody(barList);
+            return  ResponseEntity.status(HttpStatus.OK).body(baresDto);
+
         }catch (Exception ex){
             LOGGER.error(ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            baresDto.setErrors(new Errors(500, ex.getMessage(), Arrays.toString(ex.getStackTrace())));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(baresDto);
         }
     }
+
     @PostMapping("/create")
-    public ResponseEntity<BarEntity> postBar(@RequestBody RequestBarPostDto body){
+    public ResponseEntity<ResponseBarDto> postBar(@RequestBody RequestBarPostDto body){
+
+        ResponseBarDto barDto = new ResponseBarDto();
 
         try{
 
-            return  ResponseEntity.ok(_barService.CreateBar(body));
+            Bar bar =  _barService.CreateBar(body);
+            barDto.setBody(bar);
+
+            return  ResponseEntity.status(HttpStatus.CREATED).body(barDto);
 
         }catch (Exception ex) {
             LOGGER.error(ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            barDto.setErrors(new Errors(500, ex.getMessage(), Arrays.toString(ex.getStackTrace())));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(barDto);
         }
     }
-    @PutMapping("/update")
-    public ResponseEntity<BarEntity> putBar(@RequestBody RequestBarPutDto barInput){
 
+    @PutMapping("/update")
+    public ResponseEntity<ResponseBarDto> putBar(@RequestBody RequestBarPutDto barInput){
+
+        ResponseBarDto barDto = new ResponseBarDto();
         try{
-            BarEntity bar = _barService.PutBar(barInput);
+            Bar bar = _barService.PutBar(barInput);
+
             if (bar != null){
-                return ResponseEntity.ok(bar);
+                barDto.setBody(bar);
+                return ResponseEntity.ok(barDto);
             }else{
+                barDto.setErrors(new Errors(204, "No se encontró Bar",null));
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
 
         }catch (Exception ex) {
             LOGGER.error(ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            barDto.setErrors(new Errors(500, ex.getMessage(), Arrays.toString(ex.getStackTrace())));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(barDto);
         }
     }
 }
