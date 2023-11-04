@@ -112,7 +112,7 @@ public class BarController {
                 return ResponseEntity.ok(barDto);
             }else{
                 barDto.setErrors(new Errors(204, "No se encontró Bar",null));
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(barDto);
             }
 
         }catch (Exception ex) {
