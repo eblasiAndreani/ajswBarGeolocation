@@ -1,7 +1,6 @@
 package com.ajsw.barGeolocation.controller;
 
 import com.ajsw.barGeolocation.domain.dto.*;
-import com.ajsw.barGeolocation.domain.entity.BarEntity;
 import com.ajsw.barGeolocation.service.IBarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
