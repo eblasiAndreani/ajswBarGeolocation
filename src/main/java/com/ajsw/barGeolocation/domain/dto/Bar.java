@@ -2,6 +2,8 @@ package com.ajsw.barGeolocation.domain.dto;
 
 import lombok.Data;
 
+import java.beans.ConstructorProperties;
+
 @Data
 public class Bar {
     private int id;

@@ -10,4 +10,6 @@ class BarGeolocationApplicationTests {
 	void contextLoads() {
 	}
 
+
+
 }
